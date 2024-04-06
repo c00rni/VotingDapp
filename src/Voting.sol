@@ -3,25 +3,25 @@ pragma solidity ^0.8.13;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-// @title Voting contract
-// @author Antony Gandonou migna
-// @notice This contract is an exercice to learn about foundry and Dapp.
-// This contract allow to manage a voting process onchain.
-// @dev Administrator of voting sessions is the address which deployed
-// the contract. Admin can switch beteween deferents stats to manage
-// the voting process.
+/// @title Voting contract
+/// @author Antony Gandonou migan
+/// @notice This contract is an exercice to learn about foundry and Dapp. This contract allow to manage a voting process onchain.
+/// @dev Administrator of voting sessions is the address which deployed the contract. Admin can switch beteween deferents stats to manage the voting process.
 contract Voting is Ownable {
+    /// @notice Voter object. Save informaiton about whitelisted users.
     struct Voter {
         bool isRegistered;
         bool hasVoted;
         uint votedProposalId;
     }
 
+    /// @notice Proposal object. Describe a voter proposal for vote.
     struct Proposal {
         string description;
         uint voteCount;
     }
 
+    /// @notice Enumeration of voting process states
     enum WorkflowStatus {
         BeforeRegistrations,
         RegisteringVoters,
@@ -32,9 +32,16 @@ contract Voting is Ownable {
         VotesTallied
     }
 
+    /// @notice Id of the most voted proposal.
     uint256 winningProposalId;
+
+    /// @notice Current contract status.
     WorkflowStatus public workflowStatus;
+
+    /// @notice Map of the Voter information to their onchain address.
     mapping(address => Voter) whitelist;
+
+    /// @notice List of submited proposal for vote.
     Proposal[] proposalsArray;
 
     event VoterRegistered(address voterAddress);
@@ -52,19 +59,23 @@ contract Voting is Ownable {
         _;
     }
 
-    // @return ID of the winner
+    /// @notice Getter on the winner proposal of the vote
+    /// @return ID the most voted proposal
     function getWinner() external view returns (uint256) {
         return winningProposalId;
     }
 
+    /// @notice Getter on the a voter
+    /// @param _voterAddress The voter wallet address.
+    /// @return Voter object
     function getVoter(
-        address _voterAddres
+        address _voterAddress
     ) external view onlyVoters returns (Voter memory) {
-        return whitelist[_voterAddres];
+        return whitelist[_voterAddress];
     }
 
-    // @dev allow the administrator to add a new address of voter to the
-    // whitelist.
+    /// @notice Allow the administrator to add a new address of voter to the whitelist.
+    /// @param _voterAddress The whitelisted wallet address.
     function addVoter(address _voterAddress) external onlyOwner {
         require(_voterAddress != address(0), "You can't add null address");
         require(
@@ -79,6 +90,8 @@ contract Voting is Ownable {
         emit VoterRegistered(_voterAddress);
     }
 
+    /// @notice Create a vote. The voter must be whitelisted.
+    /// @param _id The proposal id.
     function setVote(uint _id) external onlyVoters {
         require(
             workflowStatus == WorkflowStatus.VotingSessionStarted,
@@ -99,8 +112,7 @@ contract Voting is Ownable {
 
     // ::::::::::::: STATE ::::::::::::: //
 
-    // @dev Modify the contract status to voter registration stat.
-    // Voter can be add by the administrator.
+    /// @notice Modify the contract status to voter registration stat. Voter can be add by the administrator.
     function startVoterRegistering() external onlyOwner {
         require(
             workflowStatus == WorkflowStatus.BeforeRegistrations,
@@ -114,8 +126,7 @@ contract Voting is Ownable {
         );
     }
 
-    // @dev Modify the contract status to allow proposal registration
-    // by registered voters
+    /// @notice Modify the contract status to allow proposal registration by registered voters
     function startProposalsRegistering() external onlyOwner {
         require(
             workflowStatus == WorkflowStatus.RegisteringVoters,
@@ -133,7 +144,7 @@ contract Voting is Ownable {
         );
     }
 
-    // @dev Forbid Proposal registration
+    /// @notice Modify the contract status to user to submit proposals.
     function endProposalsRegistering() external onlyOwner {
         require(
             workflowStatus == WorkflowStatus.ProposalsRegistrationStarted,
@@ -146,7 +157,7 @@ contract Voting is Ownable {
         );
     }
 
-    // @dev Modify the contract status to allow registered users to vote.
+    /// @notice Modify the contract status to allow registered users to vote.
     function startVotingSession() external onlyOwner {
         require(
             workflowStatus == WorkflowStatus.ProposalsRegistrationEnded,
@@ -159,7 +170,7 @@ contract Voting is Ownable {
         );
     }
 
-    // @dev Forbid users to vote.
+    /// @notice Modify the contract status to forbid whitelisted users to vote.
     function endVotingSession() external onlyOwner {
         require(
             workflowStatus == WorkflowStatus.VotingSessionStarted,
@@ -172,7 +183,7 @@ contract Voting is Ownable {
         );
     }
 
-    // @dev Count vote to find the winner
+    /// @notice Count vote to find and set the winner proposal.
     function tallyVotes() external onlyOwner {
         require(
             workflowStatus == WorkflowStatus.VotingSessionEnded,
@@ -196,6 +207,8 @@ contract Voting is Ownable {
         );
     }
 
+    /// @notice Add a vote proposal.
+    /// @param _desc The description of the proposal.
     function addProposal(string calldata _desc) external onlyVoters {
         require(
             workflowStatus == WorkflowStatus.ProposalsRegistrationStarted,
