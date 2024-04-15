@@ -70,7 +70,7 @@ contract Voting is Ownable {
     /// @return Voter object
     function getVoter(
         address _voterAddress
-    ) external view onlyVoters returns (Voter memory) {
+    ) external view onlyOwner returns (Voter memory) {
         return whitelist[_voterAddress];
     }
 
