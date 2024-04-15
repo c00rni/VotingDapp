@@ -74,6 +74,12 @@ contract Voting is Ownable {
         return whitelist[_voterAddress];
     }
 
+    /// @notice Getter on proposals
+    /// @return proposalArray All the proposals submited
+    function getProposals() external view returns (Proposal[] memory) {
+        return proposalsArray;
+    }
+
     /// @notice Allow the administrator to add a new address of voter to the whitelist.
     /// @param _voterAddress The whitelisted wallet address.
     function addVoter(address _voterAddress) external onlyOwner {
