@@ -10,7 +10,7 @@ Le projet Voting Dapp est une preuve de concepte d'un processus de vote utilisan
 
 ## Video Présentation
 
-![Short presentatino of the Dapp](../VotingDapp.gif)
+![Short presentatino of the Dapp](./VotingDapp.gif)
 
 ## Installation du projet
 
